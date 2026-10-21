@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Custo por KM · Etanol, gasolina e elétrico</title>
+  <meta name="description" content="Compare o custo por quilômetro de etanol, gasolina e carro elétrico. Informe o deslocamento diário e veja os gastos por dia, semana, mês e ano.">
+  <meta name="theme-color" content="#f2f6f1" id="themeColor">
+  <meta name="color-scheme" content="light dark">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Custo por KM">
+  <script>
+    (function () {
+      try {
+        var saved = JSON.parse(localStorage.getItem("custo-por-km:v1") || "null");
+        var theme = saved && (saved.theme === "light" || saved.theme === "dark")
+          ? saved.theme
+          : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.dataset.theme = theme;
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute("content", theme === "dark" ? "#0b1310" : "#f2f6f1");
+      } catch (error) {}
+    })();
+  </script>
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/icon-180.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#calcForm">Ir para o cálculo</a>
+
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="./" aria-label="Custo por KM — início">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.4 2.1a1 1 0 0 0-1.6.2L3.3 14.4a1 1 0 0 0 .9 1.5h6.2l-1.2 5.9a1 1 0 0 0 1.7.9l8.9-12.6a1 1 0 0 0-.8-1.6h-6.3l1.3-5.5a1 1 0 0 0-.6-.9Z"/></svg>
+        </span>
+        <span class="brand-text">
+          <strong>Custo por KM</strong>
+          <span>etanol · gasolina · elétrico</span>
+        </span>
+      </a>
+
+      <div class="top-actions">
+        <div class="currency-control" title="Moeda">
+          <svg class="globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M3.5 9h17M3.5 15h17"/>
+            <path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18Z"/>
+          </svg>
+          <label class="sr-only" for="currency">Moeda</label>
+          <select id="currency">
+            <option value="BRL">BRL</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="GBP">GBP</option>
+            <option value="ARS">ARS</option>
+            <option value="MXN">MXN</option>
+            <option value="CLP">CLP</option>
+            <option value="COP">COP</option>
+            <option value="CAD">CAD</option>
+            <option value="AUD">AUD</option>
+            <option value="JPY">JPY</option>
+            <option value="INR">INR</option>
+          </select>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m6 9 6 6 6-6"/>
+          </svg>
+        </div>
+
+        <button id="themeToggle" class="icon-btn" type="button" aria-label="Ativar tema escuro">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <h1 class="sr-only">Comparador de combustível: qual vale mais a pena?</h1>
+
+    <div class="layout">
+      <section class="panel form-panel" id="dados" aria-labelledby="formTitle">
+        <div class="panel-head">
+          <h2 id="formTitle">Deslocamento diário</h2>
+          <button id="resetBtn" class="text-btn" type="button">Restaurar</button>
+        </div>
+        <form id="calcForm" novalidate>
+          <div class="distance">
+            <div class="field">
+              <label class="sr-only" for="dailyDistance">Deslocamento diário em quilômetros</label>
+              <div class="input-wrap">
+                <input id="dailyDistance" name="dailyDistance" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="" placeholder="Ex.: 30">
+                <span class="suffix">km/dia</span>
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <button type="button" class="settings-cta" id="settingsBtn" aria-haspopup="dialog">
+          <span class="settings-cta-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </span>
+          <span class="settings-cta-copy">
+            <strong>Configurações</strong>
+            <small id="settingsSummary">Preços, consumo e 5 dias por semana</small>
+          </span>
+          <svg class="settings-cta-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m9 18 6-6-6-6"/>
+          </svg>
+        </button>
+      </section>
+
+      <section class="results" aria-labelledby="resultsTitle">
+        <div class="results-head">
+          <h2 id="resultsTitle">Do mais econômico ao menos econômico</h2>
+        </div>
+
+        <div class="fuel-filter" id="fuelFilter" role="group" aria-label="Combustíveis considerados">
+          <label class="fuel-toggle" data-fuel="ethanol">
+            <input type="checkbox" data-fuel-toggle="ethanol" checked>
+            <span>Etanol</span>
+          </label>
+          <label class="fuel-toggle" data-fuel="gasoline">
+            <input type="checkbox" data-fuel-toggle="gasoline" checked>
+            <span>Gasolina</span>
+          </label>
+          <label class="fuel-toggle" data-fuel="electric">
+            <input type="checkbox" data-fuel-toggle="electric" checked>
+            <span>Elétrico</span>
+          </label>
+        </div>
+
+        <div id="resultList" class="result-list"></div>
+
+        <details class="calc-details" id="calcDetails">
+          <summary>Detalhes do cálculo</summary>
+          <div id="insights" class="insights"></div>
+        </details>
+
+        <p class="disclaimer">Estimativa baseada apenas no custo da energia. Não inclui manutenção, seguro, impostos, pedágio ou depreciação do veículo.</p>
+      </section>
+    </div>
+  </main>
+
+  <dialog id="settingsDialog" class="settings-dialog" aria-labelledby="settingsTitle">
+    <div class="settings-head">
+      <div class="settings-title-wrap">
+        <span class="settings-kicker">Ajustes do cálculo</span>
+        <h2 id="settingsTitle">Configurações</h2>
+      </div>
+      <button type="button" id="closeSettings" class="icon-btn settings-close" aria-label="Fechar configurações">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <path d="M18 6 6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="settings-body">
+      <section class="settings-section">
+        <h3>Preços</h3>
+        <p class="settings-hint">Informe os preços que você paga pelo litro e pela energia.</p>
+        <div class="field-grid prices">
+          <div class="field">
+            <label for="ethanolPrice">Etanol</label>
+            <div class="input-wrap">
+              <span class="affix" data-symbol>R$</span>
+              <input id="ethanolPrice" name="ethanolPrice" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" value="4,29" data-mask="decimal" aria-label="Preço do etanol por litro">
+              <span class="suffix">/L</span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="gasolinePrice">Gasolina</label>
+            <div class="input-wrap">
+              <span class="affix" data-symbol>R$</span>
+              <input id="gasolinePrice" name="gasolinePrice" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" value="6,19" data-mask="decimal" aria-label="Preço da gasolina por litro">
+              <span class="suffix">/L</span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="electricPrice">Energia</label>
+            <div class="input-wrap">
+              <span class="affix" data-symbol>R$</span>
+              <input id="electricPrice" name="electricPrice" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" value="0,79" data-mask="decimal" aria-label="Preço da energia elétrica por quilowatt-hora">
+              <span class="suffix">/kWh</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr class="section-line" aria-hidden="true">
+
+      <section class="settings-section">
+        <h3>Consumo do veículo</h3>
+        <p class="settings-hint">Use a média do seu carro ou os dados do fabricante.</p>
+        <div class="stack">
+          <div class="field">
+            <label for="ethanolConsumption">Etanol</label>
+            <div class="input-wrap split">
+              <input id="ethanolConsumption" name="ethanolConsumption" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" value="8,50" data-mask="decimal" aria-label="Consumo com etanol">
+              <select id="ethanolUnit" class="unit-select" aria-label="Unidade de consumo do etanol">
+                <option value="km/L">km/L</option>
+                <option value="L/100km">L/100 km</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="gasolineConsumption">Gasolina</label>
+            <div class="input-wrap split">
+              <input id="gasolineConsumption" name="gasolineConsumption" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" value="12,00" data-mask="decimal" aria-label="Consumo com gasolina">
+              <select id="gasolineUnit" class="unit-select" aria-label="Unidade de consumo da gasolina">
+                <option value="km/L">km/L</option>
+                <option value="L/100km">L/100 km</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="electricConsumption">Elétrico</label>
+            <div class="input-wrap split">
+              <input id="electricConsumption" name="electricConsumption" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" value="5,50" data-mask="decimal" aria-label="Consumo do carro elétrico">
+              <select id="electricUnit" class="unit-select" aria-label="Unidade de consumo do carro elétrico">
+                <option value="km/kWh">km/kWh</option>
+                <option value="kWh/100km">kWh/100 km</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr class="section-line" aria-hidden="true">
+
+      <section class="settings-section">
+        <h3>Semana de uso</h3>
+        <p class="settings-hint">Quantos dias por semana você usa o carro? Normalmente de segunda a sexta.</p>
+        <div class="field">
+          <label for="daysPerWeek">Dias por semana</label>
+          <div class="input-wrap select-wrap">
+            <select id="daysPerWeek">
+              <option value="1">1 dia</option>
+              <option value="2">2 dias</option>
+              <option value="3">3 dias</option>
+              <option value="4">4 dias</option>
+              <option value="5" selected>5 dias (seg–sex)</option>
+              <option value="6">6 dias</option>
+              <option value="7">7 dias</option>
+            </select>
+            <svg class="select-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m6 9 6 6 6-6"/>
+            </svg>
+          </div>
+        </div>
+        <p class="settings-note" id="daysSummary">Semana = 5 dias · Mês ≈ 21,7 dias · Ano = 260 dias de uso.</p>
+      </section>
+    </div>
+
+    <div class="settings-foot">
+      <p class="settings-foot-note">As alterações só são aplicadas ao concluir.</p>
+      <button type="button" id="doneSettings" class="primary-btn">Concluir</button>
+    </div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <noscript><p class="noscript">Ative o JavaScript para usar a calculadora.</p></noscript>
+  <script src="assets/app.js" defer></script>
+</body>
+</html>
