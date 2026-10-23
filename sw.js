@@ -1,4 +1,4 @@
-const CACHE = "custo-por-km-v11";
+const CACHE = "custo-por-km-v12";
 const ASSETS = [
   "./",
   "./index.html",

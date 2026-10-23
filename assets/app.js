@@ -2,7 +2,7 @@
   "use strict";
 
   const STORAGE_KEY = "custo-por-km:v1";
-  const APP_VERSION = "1.1.0";
+  const APP_VERSION = "1.1.1";
   const UPDATE_CHECK_INTERVAL = 30 * 60 * 1000;
   const UPDATE_CHECK_THROTTLE = 60 * 1000;
 

@@ -4,7 +4,7 @@
 > **Tipo:** Aplicação web estática (PWA), sem build e sem dependências
 > **Idioma:** pt-BR
 > **Documento gerado em:** 23/10/2026
-> **Versão do app:** `1.1.0` — inclui verificação e aplicação de atualizações
+> **Versão do app:** `1.1.1` — inclui verificação e aplicação de atualizações
 > **Base de código:** commit `e40c319` + fluxo de atualização (23/10/2026)
 > **Escopo deste documento:** visão geral, escopo funcional, regras de negócio, stack, arquitetura, cores, tipografia, layout, componentes, acessibilidade, PWA, atualizações e guia de manutenção.
 
@@ -222,7 +222,7 @@ Definidos em `app.js:24-53` e refletidos no HTML.
 | Estilo | CSS3 puro | Custom properties, `color-mix()`, `:has()`, `clamp()`, grid/flex |
 | Comportamento | JavaScript vanilla (ES2020+) | IIFE com `"use strict"`; nenhum framework |
 | Persistência | Web Storage API | Chave `custo-por-km:v1` |
-| Offline | Service Worker | Cache próprio `custo-por-km-v11` |
+| Offline | Service Worker | Cache próprio `custo-por-km-v12` |
 | Instalação | Web App Manifest | `display: standalone` |
 | Tipografia | Fontes do sistema | Nenhuma webfont baixada |
 | Ícones | SVG inline + PNG | SVG para UI; PNG para instalação |
@@ -339,7 +339,7 @@ Regras de restauração (`app.js:842-882`):
 
 | Aspecto | Implementação |
 |---|---|
-| Nome do cache | `custo-por-km-v11` (`sw.js:1`) |
+| Nome do cache | `custo-por-km-v12` (`sw.js:1`) |
 | Precache | `./`, HTML, CSS, JS, ícones e manifest (`sw.js:2-12`), buscados com `cache: "reload"` |
 | Instalação | `cache.addAll` + `skipWaiting()` |
 | Ativação | Remove caches antigos + `clients.claim()` + broadcast `SW_ACTIVATED` |
