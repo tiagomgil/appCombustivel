@@ -2,7 +2,7 @@
   "use strict";
 
   const STORAGE_KEY = "custo-por-km:v1";
-  const APP_VERSION = "1.1.1";
+  const APP_VERSION = "1.1.2";
   const UPDATE_CHECK_INTERVAL = 30 * 60 * 1000;
   const UPDATE_CHECK_THROTTLE = 60 * 1000;
 
@@ -1046,7 +1046,7 @@
     manualCheckTimer = window.setTimeout(() => {
       registration.removeEventListener("updatefound", onUpdateFound);
       if (found || registration.installing || registration.waiting) return;
-      showToast(`Você está na versão ${APP_VERSION}`);
+      showToast("Você está na versão mais recente do app");
     }, 2500);
   }
 })();
