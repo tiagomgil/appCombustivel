@@ -153,6 +153,13 @@
     </div>
   </main>
 
+  <footer class="app-footer shell">
+    <div class="app-version">
+      <span>Versão <strong id="appVersion">1.1.0</strong></span>
+      <button type="button" id="checkUpdate" class="text-btn">Verificar atualização</button>
+    </div>
+  </footer>
+
   <dialog id="settingsDialog" class="settings-dialog" aria-labelledby="settingsTitle">
     <div class="settings-head">
       <div class="settings-title-wrap">
@@ -175,7 +182,7 @@
             <label for="ethanolPrice">Etanol</label>
             <div class="input-wrap">
               <span class="affix" data-symbol>R$</span>
-              <input id="ethanolPrice" name="ethanolPrice" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" value="4,29" data-mask="decimal" aria-label="Preço do etanol por litro">
+              <input id="ethanolPrice" name="ethanolPrice" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" value="3,59" data-mask="decimal" aria-label="Preço do etanol por litro">
               <span class="suffix">/L</span>
             </div>
           </div>
@@ -183,7 +190,7 @@
             <label for="gasolinePrice">Gasolina</label>
             <div class="input-wrap">
               <span class="affix" data-symbol>R$</span>
-              <input id="gasolinePrice" name="gasolinePrice" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" value="6,19" data-mask="decimal" aria-label="Preço da gasolina por litro">
+              <input id="gasolinePrice" name="gasolinePrice" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" value="6,09" data-mask="decimal" aria-label="Preço da gasolina por litro">
               <span class="suffix">/L</span>
             </div>
           </div>
@@ -191,7 +198,7 @@
             <label for="electricPrice">Energia</label>
             <div class="input-wrap">
               <span class="affix" data-symbol>R$</span>
-              <input id="electricPrice" name="electricPrice" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" value="0,79" data-mask="decimal" aria-label="Preço da energia elétrica por quilowatt-hora">
+              <input id="electricPrice" name="electricPrice" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" value="0,91" data-mask="decimal" aria-label="Preço da energia elétrica por quilowatt-hora">
               <span class="suffix">/kWh</span>
             </div>
           </div>
@@ -207,7 +214,7 @@
           <div class="field">
             <label for="ethanolConsumption">Etanol</label>
             <div class="input-wrap split">
-              <input id="ethanolConsumption" name="ethanolConsumption" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" value="8,50" data-mask="decimal" aria-label="Consumo com etanol">
+              <input id="ethanolConsumption" name="ethanolConsumption" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" value="11,00" data-mask="decimal" aria-label="Consumo com etanol">
               <select id="ethanolUnit" class="unit-select" aria-label="Unidade de consumo do etanol">
                 <option value="km/L">km/L</option>
                 <option value="L/100km">L/100 km</option>
@@ -217,7 +224,7 @@
           <div class="field">
             <label for="gasolineConsumption">Gasolina</label>
             <div class="input-wrap split">
-              <input id="gasolineConsumption" name="gasolineConsumption" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" value="12,00" data-mask="decimal" aria-label="Consumo com gasolina">
+              <input id="gasolineConsumption" name="gasolineConsumption" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" value="14,00" data-mask="decimal" aria-label="Consumo com gasolina">
               <select id="gasolineUnit" class="unit-select" aria-label="Unidade de consumo da gasolina">
                 <option value="km/L">km/L</option>
                 <option value="L/100km">L/100 km</option>
@@ -227,7 +234,7 @@
           <div class="field">
             <label for="electricConsumption">Elétrico</label>
             <div class="input-wrap split">
-              <input id="electricConsumption" name="electricConsumption" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" value="5,50" data-mask="decimal" aria-label="Consumo do carro elétrico">
+              <input id="electricConsumption" name="electricConsumption" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" value="7,45" data-mask="decimal" aria-label="Consumo do carro elétrico">
               <select id="electricUnit" class="unit-select" aria-label="Unidade de consumo do carro elétrico">
                 <option value="km/kWh">km/kWh</option>
                 <option value="kWh/100km">kWh/100 km</option>
@@ -268,6 +275,19 @@
       <button type="button" id="doneSettings" class="primary-btn">Concluir</button>
     </div>
   </dialog>
+
+  <div id="updateBanner" class="update-banner" role="status" aria-live="polite" hidden>
+    <div class="update-banner-copy">
+      <strong>Nova versão disponível</strong>
+      <small>Atualize para usar a versão mais recente.</small>
+    </div>
+    <button type="button" id="updateNow" class="update-btn">Atualizar agora</button>
+    <button type="button" id="updateLater" class="icon-btn update-dismiss" aria-label="Agora não">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <path d="M18 6 6 18M6 6l12 12"/>
+      </svg>
+    </button>
+  </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <noscript><p class="noscript">Ative o JavaScript para usar a calculadora.</p></noscript>

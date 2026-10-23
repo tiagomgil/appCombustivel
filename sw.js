@@ -1,4 +1,4 @@
-const CACHE = "custo-por-km-v10";
+const CACHE = "custo-por-km-v11";
 const ASSETS = [
   "./",
   "./index.html",
@@ -13,7 +13,9 @@ const ASSETS = [
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting())
+    caches.open(CACHE)
+      .then((cache) => cache.addAll(ASSETS.map((url) => new Request(url, { cache: "reload" }))))
+      .then(() => self.skipWaiting())
   );
 });
 
@@ -22,7 +24,25 @@ self.addEventListener("activate", (event) => {
     caches.keys()
       .then((keys) => Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key))))
       .then(() => self.clients.claim())
+      .then(() => self.clients.matchAll({ type: "window" }))
+      .then((clients) => {
+        clients.forEach((client) => {
+          client.postMessage({ type: "SW_ACTIVATED", version: CACHE });
+        });
+      })
   );
+});
+
+self.addEventListener("message", (event) => {
+  const data = event.data || {};
+
+  if (data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+
+  if (data.type === "GET_VERSION" && event.ports && event.ports[0]) {
+    event.ports[0].postMessage({ version: CACHE });
+  }
 });
 
 self.addEventListener("fetch", (event) => {

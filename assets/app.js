@@ -2,6 +2,9 @@
   "use strict";
 
   const STORAGE_KEY = "custo-por-km:v1";
+  const APP_VERSION = "1.1.0";
+  const UPDATE_CHECK_INTERVAL = 30 * 60 * 1000;
+  const UPDATE_CHECK_THROTTLE = 60 * 1000;
 
   const CURRENCIES = {
     BRL: { locale: "pt-BR" },
@@ -19,12 +22,12 @@
   };
 
   const DEFAULT_VALUES = {
-    ethanolPrice: "4,29",
-    gasolinePrice: "6,19",
-    electricPrice: "0,79",
-    ethanolConsumption: "8,50",
-    gasolineConsumption: "12,00",
-    electricConsumption: "5,50",
+    ethanolPrice: "3,59",
+    gasolinePrice: "6,09",
+    electricPrice: "0,91",
+    ethanolConsumption: "11,00",
+    gasolineConsumption: "14,00",
+    electricConsumption: "7,45",
     dailyDistance: "",
     daysPerWeek: "5"
   };
@@ -39,12 +42,12 @@
   ];
 
   const DEFAULT_NUMBERS = {
-    ethanolPrice: 4.29,
-    gasolinePrice: 6.19,
-    electricPrice: 0.79,
-    ethanolConsumption: 8.5,
-    gasolineConsumption: 12,
-    electricConsumption: 5.5,
+    ethanolPrice: 3.59,
+    gasolinePrice: 6.09,
+    electricPrice: 0.91,
+    ethanolConsumption: 11,
+    gasolineConsumption: 14,
+    electricConsumption: 7.45,
     dailyDistance: 0,
     daysPerWeek: 5
   };
@@ -126,7 +129,12 @@
     closeSettings: document.getElementById("closeSettings"),
     doneSettings: document.getElementById("doneSettings"),
     settingsSummary: document.getElementById("settingsSummary"),
-    daysSummary: document.getElementById("daysSummary")
+    daysSummary: document.getElementById("daysSummary"),
+    updateBanner: document.getElementById("updateBanner"),
+    updateNow: document.getElementById("updateNow"),
+    updateLater: document.getElementById("updateLater"),
+    checkUpdate: document.getElementById("checkUpdate"),
+    appVersion: document.getElementById("appVersion")
   };
 
   const themeMedia = window.matchMedia("(prefers-color-scheme: dark)");
@@ -135,11 +143,17 @@
   let separators = getSeparators("pt-BR");
   let state = loadState();
   let draftUnits = { ...state.units };
+  let hadController = false;
+  let refreshing = false;
+  let lastUpdateCheck = 0;
+  let manualCheckTimer = null;
 
   init();
 
   function init() {
     bindEvents();
+    if (els.appVersion) els.appVersion.textContent = APP_VERSION;
+    hadController = Boolean("serviceWorker" in navigator && navigator.serviceWorker.controller);
     separators = getSeparators(currentLocale());
     syncForm();
     state.values = collectValues();
@@ -205,6 +219,12 @@
       applyTheme(next, true);
       persist();
     });
+
+    if (els.updateNow) els.updateNow.addEventListener("click", applyUpdate);
+    if (els.updateLater) els.updateLater.addEventListener("click", hideUpdateBanner);
+    if (els.checkUpdate) {
+      els.checkUpdate.addEventListener("click", () => checkForUpdate({ manual: true }));
+    }
 
     els.resetBtn.addEventListener("click", () => {
       const values = {};
@@ -888,8 +908,145 @@
   function registerServiceWorker() {
     if (!("serviceWorker" in navigator)) return;
     if (location.protocol === "file:") return;
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js").catch(() => {});
+
+    navigator.serviceWorker.addEventListener("controllerchange", handleControllerChange);
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") checkForUpdate();
     });
+
+    window.addEventListener("pageshow", (event) => {
+      if (event.persisted) checkForUpdate();
+    });
+
+    window.addEventListener("online", () => checkForUpdate());
+
+    window.setInterval(() => {
+      if (document.visibilityState === "visible") checkForUpdate();
+    }, UPDATE_CHECK_INTERVAL);
+
+    window.addEventListener("load", () => {
+      navigator.serviceWorker
+        .register("./sw.js", { updateViaCache: "none" })
+        .then((registration) => {
+          registration.addEventListener("updatefound", () => {
+            const worker = registration.installing;
+            if (!worker) return;
+
+            worker.addEventListener("statechange", () => {
+              if (worker.state === "installed" && navigator.serviceWorker.controller) {
+                showUpdateBanner();
+              }
+            });
+          });
+
+          checkForUpdate();
+        })
+        .catch(() => {});
+    });
+  }
+
+  function handleControllerChange() {
+    if (!hadController) {
+      hadController = true;
+      return;
+    }
+
+    if (refreshing) return;
+    showUpdateBanner();
+  }
+
+  function showUpdateBanner() {
+    if (!els.updateBanner || !els.updateBanner.hidden) return;
+    els.updateBanner.hidden = false;
+    document.body.classList.add("has-update-banner");
+  }
+
+  function hideUpdateBanner() {
+    if (!els.updateBanner) return;
+    els.updateBanner.hidden = true;
+    document.body.classList.remove("has-update-banner");
+  }
+
+  function applyUpdate() {
+    hideUpdateBanner();
+    refreshing = true;
+
+    navigator.serviceWorker
+      .getRegistration()
+      .then((registration) => {
+        if (registration && registration.waiting) {
+          registration.waiting.postMessage({ type: "SKIP_WAITING" });
+          window.setTimeout(() => window.location.reload(), 3000);
+          return;
+        }
+
+        window.location.reload();
+      })
+      .catch(() => window.location.reload());
+  }
+
+  async function checkForUpdate({ manual = false } = {}) {
+    if (!("serviceWorker" in navigator)) {
+      if (manual) showToast("Atualização não disponível neste navegador");
+      return;
+    }
+
+    if (location.protocol === "file:") {
+      if (manual) showToast("Atualização indisponível ao abrir o arquivo diretamente");
+      return;
+    }
+
+    const now = Date.now();
+    if (!manual && now - lastUpdateCheck < UPDATE_CHECK_THROTTLE) return;
+    lastUpdateCheck = now;
+
+    let registration = null;
+    try {
+      registration = await navigator.serviceWorker.getRegistration();
+    } catch (error) {
+      registration = null;
+    }
+
+    if (!registration) {
+      if (manual) showToast("O modo offline ainda não está ativo");
+      return;
+    }
+
+    if (registration.waiting && navigator.serviceWorker.controller) {
+      showUpdateBanner();
+      if (manual) showToast("Atualização disponível");
+      return;
+    }
+
+    let found = false;
+    window.clearTimeout(manualCheckTimer);
+
+    const onUpdateFound = () => {
+      found = true;
+    };
+
+    registration.addEventListener("updatefound", onUpdateFound);
+
+    try {
+      await registration.update();
+    } catch (error) {
+      registration.removeEventListener("updatefound", onUpdateFound);
+      if (manual) showToast("Não foi possível verificar agora");
+      return;
+    }
+
+    if (!manual) {
+      window.setTimeout(() => {
+        registration.removeEventListener("updatefound", onUpdateFound);
+      }, 5000);
+      return;
+    }
+
+    manualCheckTimer = window.setTimeout(() => {
+      registration.removeEventListener("updatefound", onUpdateFound);
+      if (found || registration.installing || registration.waiting) return;
+      showToast(`Você está na versão ${APP_VERSION}`);
+    }, 2500);
   }
 })();
